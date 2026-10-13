@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto de Python</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #10131c;
+  color: #e8eaf2;
+  font-family: Consolas, monospace;
+  transition: background 1s;
+}
+
+.card {
+  width: 100%;
+  max-width: 650px;
+  padding: 28px;
+  background: #1b2030;
+  border: 1px solid #353c52;
+  border-radius: 18px;
+  box-shadow: 0 15px 50px #0006;
+  transition: 0.8s;
+}
+
+.top { color: #8d96ad; font-size: 13px; }
+h1 { font-size: 23px; color: #80d6ff; }
+#code { color: #b6f3bd; white-space: pre-wrap; line-height: 1.8; }
+#question { font-family: Arial, sans-serif; font-size: 19px; line-height: 1.5; margin-top: 24px; }
+input {
+  width: 100%;
+  padding: 13px;
+  margin-top: 14px;
+  background: #10131c;
+  color: white;
+  border: 1px solid #59647e;
+  border-radius: 9px;
+  font-size: 16px;
+}
+button {
+  padding: 12px 20px;
+  margin: 12px 7px 0 0;
+  border: 0;
+  border-radius: 9px;
+  background: #80d6ff;
+  color: #10131c;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 15px;
+}
+button:hover { transform: translateY(-2px); }
+#feedback { margin-top: 15px; color: #ffb4d2; font-family: Arial, sans-serif; }
+.romantic {
+  background: linear-gradient(135deg, #29152e, #181c35, #352039);
+}
+.romantic .card {
+  background: #251d35;
+  border-color: #bd78b8;
+  box-shadow: 0 0 45px #d75eaa30;
+}
+.romantic h1 { color: #ffb4d2; }
+.romantic button {
+  background: #ffacd0;
+  color: #36182f;
+}
+.romantic input { border-color: #bd78b8; }
+.heart { font-size: 40px; text-align: center; }
+</style>
+</head>
+
+<body>
+<div class="card">
+  <div class="top">Python 3.12 · proyecto_final.py</div>
+  <h1 id="title"> Proyecto de programación</h1>
+  <div id="code"># Iniciando programa...
+nombre = input("Ingresa tu nombre:")</div>
+  <div id="question"></div>
+  <div id="controls"></div>
+  <div id="feedback"></div>
+</div>
+
+<script>
+const preguntas = [
+  ["¿Cuántos años tienes?", "edad"],
+  ["¿Cuál es tu nombre?", "nombre"],
+  ["¿Cuál es tu apellido?", "apellido"],
+  ["¿De qué color es tu cabello?", "cabello"],
+  ["¿Cuál es tu color favorito?", "color favorito"],
+  ["¿Cuál es tu banda favorita?", "banda favorita"],
+  ["¿Quién es tu cantante favorito?", "cantante favorito"],
+  ["¿Cuál es tu canción favorita?", "canción favorita"],
+  ["¿Cuál es tu pintura favorita?", "pintura favorita"]
+];
+
+let paso = 0;
+let respuestas = {};
+let nombre = "Fer";
+let enamorado = false;
+
+const question = document.getElementById("question");
+const controls = document.getElementById("controls");
+const code = document.getElementById("code");
+const feedback = document.getElementById("feedback");
+
+function mostrar(texto, opciones = []) {
+  question.innerHTML = texto;
+  controls.innerHTML = "";
+  feedback.innerHTML = "";
+
+  opciones.forEach(op => {
+    const b = document.createElement("button");
+    b.textContent = op.texto;
+    b.onclick = op.accion;
+    controls.appendChild(b);
+  });
+}
+
+function entrada(texto, placeholder, accion) {
+  mostrar(texto);
+  const input = document.createElement("input");
+  input.placeholder = placeholder || "Escribe tu respuesta...";
+  input.id = "respuesta";
+  controls.appendChild(input);
+
+  const b = document.createElement("button");
+  b.textContent = "Continuar →";
+  b.onclick = () => {
+    const valor = input.value.trim();
+    if (!valor) {
+      feedback.textContent = "Escribe una respuesta primero ";
+      return;
+    }
+    accion(valor);
+  };
+  controls.appendChild(b);
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") b.click();
+  });
+}
+
+function siguientePregunta() {
+  if (paso >= preguntas.length) {
+    estadoRelacion();
+    return;
+  }
+
+  const [pregunta, variable] = preguntas[paso];
+  code.textContent =
+    "# Pregunta " + (paso + 1) + "\n" +
+    variable.replaceAll(" ", "_") +
+    ' = input("' + pregunta + '")';
+
+  entrada(pregunta, "Escribe aquí...", valor => {
+    respuestas[variable] = valor;
+    if (paso === 1) nombre = valor;
+    paso++;
+    siguientePregunta();
+  });
+}
+
+function estadoRelacion() {
+  document.getElementById("title").textContent =
+    "Análisis de datos";
+
+  code.textContent =
+    'estado = input("¿Estás soltera o en una relación?")';
+
+  mostrar("Una pregunta importante: ¿estás soltera o en una relación?", [
+    { texto: "Estoy soltera", accion: quierePareja },
+    { texto: "Estoy en una relación", accion: () => {
+      feedback.textContent = "Mentirosa todavía no te pido ser novios";
+      setTimeout(estadoRelacion, 1600);
+    }}
+  ]);
+}
+
+function quierePareja() {
+  code.textContent = 'quiere_pareja = input("¿Quieres pareja?")';
+  mostrar("¿Quieres pareja?", [
+    { texto: "Sí ", accion: segura },
+    { texto: "No", accion: () => {
+      mostrar("Jajaja, bueno, continuemos con el programa ", [
+        { texto: "Continuar", accion: quierePareja }
+      ]);
+    }}
+  ]);
+}
+
+function segura() {
+  code.textContent = 'respuesta = input("¿Segura?")';
+  mostrar("¿Segura?", [
+    { texto: "Sí, segurísima", accion: nombrePareja },
+    { texto: "Mmm, no sé", accion: () => {
+      mostrar("Tómate tu tiempo para pensarlo", [
+        { texto: "Ya estoy segura", accion: nombrePareja },
+        { texto: "Mejor no", accion: quierePareja }
+      ]);
+    }}
+  ]);
+}
+
+function nombrePareja() {
+  entrada(
+    "Ingresa el nombre de con quién quieres salir:",
+    "Nombre de esa persona...",
+    valor => {
+      respuestas["persona elegida"] = valor;
+      mostrar("Bien, entonces prosigue con las preguntas", [
+        { texto: "Siguiente →", accion: preguntasAlfredo }
+      ]);
+    }
+  );
+}
+
+function preguntasAlfredo() {
+  entrada("¿De qué color son los ojos de Alfredo?", "Color de ojos...", ojos => {
+    respuestas["ojos Alfredo"] = ojos;
+    entrada("¿Cuántos años tiene Alfredo?", "Su edad...", edad => {
+      respuestas["edad Alfredo"] = edad;
+      declaracion();
+    });
+  });
+}
+
+function declaracion() {
+  document.body.classList.add("romantic");
+  document.getElementById("title").textContent = "Un momento...";
+  code.textContent =
+    "# Ejecutando sentimientos..." +
+    "if sentimientos == True:" +
+    '    print("Tengo algo que decirte...")';
+
+  mostrar(
+    "Fer, tengo algo que decirte…<br><br>" +
+    "La verdad es que este programa no era una tarea cualquiera. " +
+    "Lo hice porque me gustas y me encanta lo que estamos construyendo. " +
+    "Quiero seguir conociéndote y crear muchos momentos bonitos contigo. ",
+    [{ texto: "Continuar", accion: preguntaFinal }]
+  );
+}
+
+function preguntaFinal() {
+  code.textContent =
+    "# Última pregunta del programa...\n" +
+    'respuesta = input("¿Quieres ser mi novia?")';
+
+  mostrar("Fer, después de todo esto, quiero preguntarte algo de verdad…<br><br>" +
+    "<strong>¿Quieres ser mi novia? </strong>", [
+      { texto: "Si", accion: finalSi },
+      { texto: "No", accion: finalNo }
+    ]);
+}
+
+function finalSi() {
+  code.textContent =
+    "if respuesta == 'sí':\n" +
+    '    print("La persona más feliz del mundo")';
+
+  mostrar(
+    '<div class="heart">❤️</div>' +
+    "<h2>¡WUUUUUUUUUUUUUU!</h2>" +
+    "Prometo ponerle muchas ganas a lo nuestro.<br><br>" +
+    "<strong>Atentamente: Alfredo </strong>",
+    [{ texto: "Volver a leer ", accion: declaracion }]
+  );
+}
+
+function finalNo() {
+  mostrar(
+    "Gracias por ser sincera conmigo, Fer. <br><br>" +
+    "Me gustas mucho y respeto lo que sientes. " +
+    "Gracias por tomarte el tiempo de llegar hasta aquí.",
+    [{ texto: "Volver al inicio", accion: () => location.reload() }]
+  );
+}
+
+siguientePregunta();
+</script>
+</body>
+</html>
